@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="5353a725-eeda-4300-8ba7-d003b607fd56" name="Default Changelist" comment="" />
+    <list default="true" id="5353a725-eeda-4300-8ba7-d003b607fd56" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -19,15 +21,20 @@
     </option>
   </component>
   <component name="ProjectId" id="1iYKLY1f8v33IaEM0s8Egj1lPOa" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../2Care" />
+    <property name="nodejs_package_manager_path" value="npm" />
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
@@ -41,11 +48,52 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1602079030028</updated>
-      <workItem from="1602079031079" duration="460000" />
+      <workItem from="1602079031079" duration="2305000" />
     </task>
+    <task id="LOCAL-00001" summary="Initialize app">
+      <created>1602080197077</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1602080197077</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Initialize app">
+      <created>1602080744269</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1602080744269</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Initialize app">
+      <created>1602080838886</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1602080838886</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="Initialize app" />
+    <option name="LAST_COMMIT_MESSAGE" value="Initialize app" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="493" y="127" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1602081502574">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="493" y="127" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1050@0.0.1920.1050" timestamp="1602081502574" />
+    <state x="585" y="94" key="CommitChangelistDialog2" timestamp="1602080838132">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="585" y="94" key="CommitChangelistDialog2/0.0.1920.1050@0.0.1920.1050" timestamp="1602080838132" />
+    <state x="552" y="258" key="Vcs.Push.Dialog.v2" timestamp="1602080842633">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="552" y="258" key="Vcs.Push.Dialog.v2/0.0.1920.1050@0.0.1920.1050" timestamp="1602080842633" />
   </component>
 </project>

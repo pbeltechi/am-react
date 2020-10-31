@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5353a725-eeda-4300-8ba7-d003b607fd56" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/guitar/edit/EditGuitar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/guitar/edit/EditGuitar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/guitar/list/GuitarList.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/guitar/list/GuitarList.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,7 +24,7 @@
     </option>
   </component>
   <component name="ProjectId" id="1iYKLY1f8v33IaEM0s8Egj1lPOa" />
-  <component name="ProjectLevelVcsManager">
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="2" id="Add" />
   </component>
   <component name="ProjectViewState">
@@ -33,12 +36,24 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../2Care" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
     <property name="settings.editor.selected.configurable" value="vcs.Git" />
+    <property name="ts.external.directory.path" value="E:\College\sem5\pdm\am-react\node_modules\typescript\lib" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\College\sem5\pdm\am-react\src\pages\guitar\edit" />
+      <recent name="E:\College\sem5\pdm\am-react\src\pages\guitar\list" />
+      <recent name="E:\College\sem5\pdm\am-react\src\pages\guitar" />
+      <recent name="E:\College\sem5\pdm\am-react\src\core" />
+    </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -48,7 +63,14 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1602079030028</updated>
-      <workItem from="1602079031079" duration="2305000" />
+      <workItem from="1602079031079" duration="2457000" />
+      <workItem from="1602530037029" duration="63000" />
+      <workItem from="1603286201589" duration="576000" />
+      <workItem from="1603370125930" duration="17000" />
+      <workItem from="1604076669871" duration="17885000" />
+      <workItem from="1604160542083" duration="11264000" />
+      <workItem from="1604244719531" duration="42000" />
+      <workItem from="1604259864067" duration="3292000" />
     </task>
     <task id="LOCAL-00001" summary="Initialize app">
       <created>1602080197077</created>
@@ -71,29 +93,66 @@
       <option name="project" value="LOCAL" />
       <updated>1602080838886</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Initialize app">
+      <created>1602081651346</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1602081651346</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Implement a master-detail user interface which receives server-side notifications via web socket">
+      <created>1604173696832</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1604173696832</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ORDER">
+      <list>
+        <option value="0" />
+        <option value="2" />
+        <option value="3" />
+        <option value="1" />
+      </list>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="Initialize app" />
-    <option name="LAST_COMMIT_MESSAGE" value="Initialize app" />
+    <MESSAGE value="Implement a master-detail user interface which receives server-side notifications via web socket" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implement a master-detail user interface which receives server-side notifications via web socket" />
   </component>
   <component name="WindowStateProjectService">
     <state x="493" y="127" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1602081502574">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="493" y="127" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1050@0.0.1920.1050" timestamp="1602081502574" />
-    <state x="585" y="94" key="CommitChangelistDialog2" timestamp="1602080838132">
+    <state x="734" y="327" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1604077871165">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="585" y="94" key="CommitChangelistDialog2/0.0.1920.1050@0.0.1920.1050" timestamp="1602080838132" />
-    <state x="552" y="258" key="Vcs.Push.Dialog.v2" timestamp="1602080842633">
+    <state x="734" y="327" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1050@0.0.1920.1050" timestamp="1604077871165" />
+    <state x="585" y="94" key="CommitChangelistDialog2" timestamp="1604173695218">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
-    <state x="552" y="258" key="Vcs.Push.Dialog.v2/0.0.1920.1050@0.0.1920.1050" timestamp="1602080842633" />
+    <state x="585" y="94" key="CommitChangelistDialog2/0.0.1920.1050@0.0.1920.1050" timestamp="1604173695218" />
+    <state x="540" y="268" key="IDE.errors.dialog" timestamp="1604172043182">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="540" y="268" key="IDE.errors.dialog/0.0.1920.1050@0.0.1920.1050" timestamp="1604172043182" />
+    <state x="552" y="258" key="Vcs.Push.Dialog.v2" timestamp="1604173698563">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="552" y="258" key="Vcs.Push.Dialog.v2/0.0.1920.1050@0.0.1920.1050" timestamp="1604173698563" />
+    <state x="667" y="258" width="585" height="534" key="find.popup" timestamp="1604092342505">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="667" y="258" width="585" height="534" key="find.popup/0.0.1920.1050@0.0.1920.1050" timestamp="1604092342505" />
   </component>
 </project>

@@ -1,6 +1,6 @@
 import axios, {AxiosResponse} from 'axios';
-import {Guitar} from "../core/Guitar";
-import {baseUrl, httpConfig, wsUrl} from "../core/Utils";
+import {Guitar} from "../Guitar";
+import {baseUrl, httpConfig, wsUrl} from "../../core/Utils";
 
 const guitarUrl = `${baseUrl}/api/guitars`;
 
@@ -17,9 +17,9 @@ export const updateGuitar: (guitar: Guitar) => Promise<AxiosResponse<Guitar>> = 
     return axios.put<Guitar>(url, guitar, httpConfig());
 }
 
-export const deleteGuitar: (id: string) => Promise<AxiosResponse<void>> = id => {
+export const deleteGuitar: (id: string) => Promise<AxiosResponse<Guitar>> = id => {
     const url = `${guitarUrl}/${id}`;
-    return axios.delete<void>(url, httpConfig());
+    return axios.delete<Guitar>(url, httpConfig());
 }
 
 interface MessageData {

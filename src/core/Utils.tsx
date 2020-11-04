@@ -1,3 +1,5 @@
+import moment from "moment";
+
 export const baseUrl = 'http://localhost:3000';
 export const wsUrl = 'ws://localhost:3000'
 
@@ -9,7 +11,7 @@ export const httpConfig = () => ({
 
 
 export interface ItemsState<T> {
-    items?: T,
+    items?: T[],
     fetching: boolean,
     fetchingError?: Error | null,
     saving: boolean,
@@ -19,3 +21,9 @@ export interface ItemsState<T> {
     saveItem?: Function,
     deleteItem?: Function,
 }
+
+export const dateFormat = (date: Date) => {
+    return moment(date).format("LL");
+}
+
+export const noop = () => {}

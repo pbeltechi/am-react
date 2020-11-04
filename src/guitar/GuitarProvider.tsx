@@ -1,16 +1,16 @@
 import React, {useCallback, useEffect, useReducer} from "react";
-import {ItemsState} from "../core/Utils";
-import {Guitar} from "../core/Guitar";
+import {Guitar} from "./Guitar";
 import PropTypes from 'prop-types';
-import {deleteGuitar, getGuitars, saveGuitar, updateGuitar, webSocket} from "./GuitarApi";
+import {deleteGuitar, getGuitars, saveGuitar, updateGuitar, webSocket} from "./service/GuitarService";
+import {ItemsState} from "../core/Utils";
 
-const guitarInitialState: ItemsState<Guitar[]> = {
+const guitarInitialState: ItemsState<Guitar> = {
     fetching: false,
     saving: false,
     deleting: false
 };
 
-export const GuitarContext = React.createContext<ItemsState<Guitar[]>>(guitarInitialState);
+export const GuitarContext = React.createContext<ItemsState<Guitar>>(guitarInitialState);
 
 const FETCH_ITEMS_STARTED = 'FETCH_ITEMS_STARTED';
 const FETCH_ITEMS_SUCCEEDED = 'FETCH_ITEMS_SUCCEEDED';
@@ -22,7 +22,7 @@ const DELETE_ITEM_STARTED = 'DELETE_ITEM_STARTED';
 const DELETE_ITEM_SUCCEEDED = 'DELETE_ITEM_SUCCEEDED';
 const DELETE_ITEM_FAILED = 'DELETE_ITEM_FAILED';
 
-const reducer: (state: ItemsState<Guitar[]>, action: { type: string, payload?: any }) => ItemsState<Guitar[]> =
+const reducer: (state: ItemsState<Guitar>, action: { type: string, payload?: any }) => ItemsState<Guitar> =
     (state, {type, payload}) => {
         switch (type) {
             case FETCH_ITEMS_STARTED:

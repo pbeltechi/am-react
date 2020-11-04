@@ -1,6 +1,21 @@
 /* Ionic Variables and Theming. For more info, please see:
 http://ionicframework.com/docs/theming/ */
 
+.action-button {
+  display: flex;
+  flex-grow: 1;
+}
+
+.input {
+  --background: #000;
+  --padding-start: 10px;
+  border-radius: 3px;
+}
+
+.fab-button {
+  --box-shadow: -10px 6px 30px #000;
+}
+
 /** Ionic CSS Variables **/
 :root {
   /** primary **/

@@ -2,8 +2,6 @@ import React from 'react';
 import {Redirect, Route} from 'react-router-dom';
 import {IonApp, IonRouterOutlet} from '@ionic/react';
 import {IonReactRouter} from '@ionic/react-router';
-import GuitarList from './pages/guitar/list/GuitarList';
-import EditGuitar from './pages/guitar/edit/EditGuitar';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -23,7 +21,9 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
-import {GuitarProvider} from './pages/GuitarProvider';
+import GuitarList from "./guitar/list/GuitarList";
+import GuitarEdit from "./guitar/edit/GuitarEdit";
+import {GuitarProvider} from "./guitar/GuitarProvider";
 
 const App: React.FC = () => (
     <IonApp>
@@ -31,8 +31,8 @@ const App: React.FC = () => (
             <IonRouterOutlet>
                 <GuitarProvider>
                     <Route path="/guitars" component={GuitarList} exact={true}/>
-                    <Route path="/guitar" component={EditGuitar} exact={true}/>
-                    <Route path="/guitar/:id" component={EditGuitar}/>
+                    <Route path="/guitar" component={GuitarEdit} exact={true}/>
+                    <Route path="/guitar/:id" component={GuitarEdit}/>
                     <Route path="/" render={() => <Redirect to="/guitars"/>} exact={true}/>
                 </GuitarProvider>
             </IonRouterOutlet>

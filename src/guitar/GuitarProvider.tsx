@@ -1,8 +1,12 @@
-import React, {useCallback, useEffect, useReducer} from "react";
+import React, {useCallback, useContext, useEffect, useReducer} from "react";
 import {Guitar} from "./Guitar";
 import PropTypes from 'prop-types';
-import {deleteGuitar, getGuitars, saveGuitar, updateGuitar, webSocket} from "./service/GuitarService";
+import {deleteGuitar, getGuitars, insertGuitar, updateGuitar, webSocket} from "./service/GuitarService";
 import {ItemsState} from "../core/Utils";
+import {AuthContext} from '../auth';
+import {Plugins} from '@capacitor/core';
+
+const {Network} = Plugins;
 
 const guitarInitialState: ItemsState<Guitar> = {
     fetching: false,
@@ -28,7 +32,7 @@ const reducer: (state: ItemsState<Guitar>, action: { type: string, payload?: any
             case FETCH_ITEMS_STARTED:
                 return {...state, fetching: true, fetchingError: null};
             case FETCH_ITEMS_SUCCEEDED:
-                return {...state, items: payload.data, fetching: false};
+                return {...state, items: payload.data, fetching: false, fetchingError: null};
             case FETCH_ITEMS_FAILED:
                 return {...state, fetchingError: payload.error, fetching: false};
             case SAVE_ITEM_STARTED:
@@ -60,16 +64,18 @@ const reducer: (state: ItemsState<Guitar>, action: { type: string, payload?: any
             default:
                 return state;
         }
-    }
+    };
 
 
 export const GuitarProvider: React.FC<{ children: PropTypes.ReactNodeLike }> = ({children}) => {
+    const {token, isAuthenticated} = useContext(AuthContext);
     const [state, dispatch] = useReducer(reducer, guitarInitialState);
     const {items, fetching, fetchingError, saving, deleting, deletingError, savingError} = state;
-    useEffect(getGuitarsEffect, []);
-    useEffect(wsEffect, []);
-    const saveItem = useCallback(saveGuitarCallback, []);
-    const deleteItem = useCallback(deleteGuitarCallback, []);
+    useEffect(getGuitarsEffect, [token]);
+    useEffect(wsEffect, [token]);
+    useEffect(networkEffect, []);
+    const saveItem = useCallback(saveGuitarCallback, [token]);
+    const deleteItem = useCallback(deleteGuitarCallback, [token]);
     const value = {items, fetching, fetchingError, deleting, deletingError, saving, savingError, saveItem, deleteItem};
     return (
         <GuitarContext.Provider value={value}>
@@ -77,17 +83,33 @@ export const GuitarProvider: React.FC<{ children: PropTypes.ReactNodeLike }> = (
         </GuitarContext.Provider>
     );
 
+    function networkEffect() {
+        let canceled = false;
+        Network.addListener('networkStatusChange', (status) => {
+            if (canceled) {
+                return;
+            }
+            console.log("Network status changed", status);
+        });
+        return () => {
+            canceled = true;
+        };
+    }
+
     function getGuitarsEffect() {
         let canceled = false;
         fetchGuitars().then();
         return () => {
             canceled = true;
-        }
+        };
 
         async function fetchGuitars() {
             try {
+                if(!isAuthenticated) {
+                    return;
+                }
                 dispatch({type: FETCH_ITEMS_STARTED});
-                const {data} = await getGuitars();
+                const data = await getGuitars(token);
                 if (!canceled) {
                     dispatch({type: FETCH_ITEMS_SUCCEEDED, payload: {data}});
                 }
@@ -100,7 +122,7 @@ export const GuitarProvider: React.FC<{ children: PropTypes.ReactNodeLike }> = (
     async function saveGuitarCallback(guitar: Guitar) {
         try {
             dispatch({type: SAVE_ITEM_STARTED});
-            const {data} = await (guitar._id ? updateGuitar(guitar) : saveGuitar(guitar));
+            const data = await (guitar._id ? updateGuitar(guitar, token) : insertGuitar(guitar, token));
             dispatch({type: SAVE_ITEM_SUCCEEDED, payload: {item: data}});
         } catch (error) {
             dispatch({type: SAVE_ITEM_FAILED, payload: {error}});
@@ -110,7 +132,7 @@ export const GuitarProvider: React.FC<{ children: PropTypes.ReactNodeLike }> = (
     async function deleteGuitarCallback(id: string) {
         try {
             dispatch({type: DELETE_ITEM_STARTED});
-            const {data} = await deleteGuitar(id);
+            const data = await deleteGuitar(id, token);
             dispatch({type: DELETE_ITEM_SUCCEEDED, payload: {item: data}});
         } catch (error) {
             dispatch({type: DELETE_ITEM_FAILED, payload: {error}});
@@ -121,24 +143,24 @@ export const GuitarProvider: React.FC<{ children: PropTypes.ReactNodeLike }> = (
         let canceled = false;
         console.log('wsEffect - connecting');
         let closeWebSocket: () => void;
-        // if (token?.trim()) {
-            closeWebSocket = webSocket(message => {
+        if (token?.trim()) {
+            closeWebSocket = webSocket(token, message => {
                 if (canceled) {
                     return;
                 }
-                const { type, payload: item } = message;
+                const {type, payload: item} = message;
                 console.log(`ws message, item ${type}`);
                 if (type === 'created' || type === 'updated') {
                     dispatch({type: SAVE_ITEM_SUCCEEDED, payload: {item: item}});
-                } else if(type === 'deleted') {
+                } else if (type === 'deleted') {
                     dispatch({type: DELETE_ITEM_SUCCEEDED, payload: {item: item}});
                 }
             });
-        // }
+        }
         return () => {
             console.log('wsEffect - disconnecting');
             canceled = true;
             closeWebSocket?.();
-        }
+        };
     }
 };

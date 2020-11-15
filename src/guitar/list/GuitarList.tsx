@@ -13,7 +13,8 @@ import {
     IonFabButton,
     IonGrid,
     IonHeader,
-    IonIcon, IonItem, IonLabel,
+    IonIcon,
+    IonLabel,
     IonList,
     IonLoading,
     IonPage,
@@ -27,13 +28,16 @@ import {GuitarContext} from "../GuitarProvider";
 import {Guitar} from "../Guitar";
 import {RouteComponentProps} from "react-router";
 import {dateFormat, noop} from "../../core/Utils";
+import {AuthContext} from '../../auth';
 
 const GuitarList: React.FC<RouteComponentProps> = ({history}) => {
     const {items, fetching, fetchingError, deleteItem} = useContext(GuitarContext);
+    const {logout} = useContext(AuthContext);
     return (
         <IonPage>
             <IonHeader>
                 <IonToolbar>
+                    <IonButton slot="end" onClick={logout}>Log out</IonButton>
                     <IonTitle>Guitars</IonTitle>
                 </IonToolbar>
             </IonHeader>
@@ -42,8 +46,8 @@ const GuitarList: React.FC<RouteComponentProps> = ({history}) => {
                 {items && (
                     <IonList>
                         {items.map(item =>
-                            <GuitarItem key={item._id} guitar={item} onEdit={id => history.push(`/guitar/${id}`)}
-                                        onDelete={id => deleteItem ? deleteItem(id) : noop()}/>
+                                <GuitarItem key={item._id} guitar={item} onEdit={id => history.push(`/guitar/${id}`)}
+                                            onDelete={id => deleteItem ? deleteItem(id) : noop()}/>
                             // <GuitarItemDebug key={item._id} guitar={item} onEdit={id => history.push(`/guitar/${id}`)}
                             // onDelete={id => deleteItem ? deleteItem(id) : noop()}/>
                         )}

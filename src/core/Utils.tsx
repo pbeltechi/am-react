@@ -3,9 +3,10 @@ import moment from "moment";
 export const baseUrl = 'http://localhost:3000';
 export const wsUrl = 'ws://localhost:3000'
 
-export const httpConfig = () => ({
+export const httpConfig = (token?: string) => ({
     headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
     }
 });
 
@@ -27,3 +28,8 @@ export const dateFormat = (date: Date) => {
 }
 
 export const noop = () => {}
+
+export class AppConstants {
+    static readonly TOKEN = 'token';
+    static readonly GUITARS = 'guitars';
+}

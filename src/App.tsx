@@ -24,17 +24,21 @@ import './theme/variables.css';
 import GuitarList from "./guitar/list/GuitarList";
 import GuitarEdit from "./guitar/edit/GuitarEdit";
 import {GuitarProvider} from "./guitar/GuitarProvider";
+import {AuthProvider, Login, PrivateRoute} from './auth';
 
 const App: React.FC = () => (
     <IonApp>
         <IonReactRouter>
             <IonRouterOutlet>
-                <GuitarProvider>
-                    <Route path="/guitars" component={GuitarList} exact={true}/>
-                    <Route path="/guitar" component={GuitarEdit} exact={true}/>
-                    <Route path="/guitar/:id" component={GuitarEdit}/>
-                    <Route path="/" render={() => <Redirect to="/guitars"/>} exact={true}/>
-                </GuitarProvider>
+                <AuthProvider>
+                    <Route path="/login" component={Login} exact={true}/>
+                    <GuitarProvider>
+                        <PrivateRoute path="/guitars" component={GuitarList} exact={true}/>
+                        <PrivateRoute path="/guitar" component={GuitarEdit} exact={true}/>
+                        <PrivateRoute path="/guitar/:id" component={GuitarEdit}/>
+                    </GuitarProvider>
+                    <Route exact path="/" render={() => <Redirect to="/guitars"/>}/>
+                </AuthProvider>
             </IonRouterOutlet>
         </IonReactRouter>
     </IonApp>

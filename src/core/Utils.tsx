@@ -21,6 +21,8 @@ export interface ItemsState<T> {
     deletingError?: Error | null,
     saveItem?: Function,
     deleteItem?: Function,
+    setPage?: Function,
+    page: number
 }
 
 export const dateFormat = (date: Date) => {

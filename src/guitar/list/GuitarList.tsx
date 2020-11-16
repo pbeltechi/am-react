@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
     IonButton,
     IonCard,
@@ -14,13 +14,15 @@ import {
     IonGrid,
     IonHeader,
     IonIcon,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent,
     IonLabel,
     IonList,
     IonLoading,
     IonPage,
     IonRow,
     IonTitle,
-    IonToolbar
+    IonToolbar, useIonViewWillEnter
 } from '@ionic/react';
 import {add} from 'ionicons/icons';
 import './GuitarList.css';
@@ -31,8 +33,23 @@ import {dateFormat, noop} from "../../core/Utils";
 import {AuthContext} from '../../auth';
 
 const GuitarList: React.FC<RouteComponentProps> = ({history}) => {
-    const {items, fetching, fetchingError, deleteItem} = useContext(GuitarContext);
+    const {items, fetching, fetchingError, deleteItem, page, setPage} = useContext(GuitarContext);
+    const [guitars, setGuitars] = useState<Guitar[]>([]);
     const {logout} = useContext(AuthContext);
+    useEffect(setNewGuitarsEffect,[items]);
+
+    function setNewGuitarsEffect() {
+        setGuitars([...guitars, ...items || []]);
+    }
+
+    function getNewItems($event: CustomEvent<void>) {
+        if(setPage){
+            setPage(page +1);
+        }
+        console.log($event);
+        ($event.target as HTMLIonInfiniteScrollElement).complete().then();
+    }
+
     return (
         <IonPage>
             <IonHeader>
@@ -42,17 +59,20 @@ const GuitarList: React.FC<RouteComponentProps> = ({history}) => {
                 </IonToolbar>
             </IonHeader>
             <IonContent fullscreen>
-                <IonLoading isOpen={fetching} message="Fetching items"/>
-                {items && (
-                    <IonList>
-                        {items.map(item =>
+                {guitars && (
+                    guitars.map(item =>
                                 <GuitarItem key={item._id} guitar={item} onEdit={id => history.push(`/guitar/${id}`)}
                                             onDelete={id => deleteItem ? deleteItem(id) : noop()}/>
                             // <GuitarItemDebug key={item._id} guitar={item} onEdit={id => history.push(`/guitar/${id}`)}
                             // onDelete={id => deleteItem ? deleteItem(id) : noop()}/>
-                        )}
-                    </IonList>
+                        )
                 )}
+                <IonInfiniteScroll threshold="100px"
+                                   onIonInfinite={(e: CustomEvent<void>) => getNewItems(e)}>
+                    <IonInfiniteScrollContent
+                        loadingText="Loading more good doggos...">
+                    </IonInfiniteScrollContent>
+                </IonInfiniteScroll>
                 {fetchingError && (
                     <div>{fetchingError.message || 'Failed to fetch items'}</div>
                 )}

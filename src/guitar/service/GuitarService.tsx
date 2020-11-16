@@ -9,11 +9,12 @@ const {Network} = Plugins;
 
 const guitarUrl = `${baseUrl}/api/guitars`;
 
-export const getGuitars: (token: string) => Promise<Guitar[]> = (token: string) => {
+export const getGuitars: (token: string, page: number) => Promise<Guitar[]> = (token: string, page: number) => {
     return Network.getStatus()
         .then(status => {
             if (status.connected) {
-                return axios.get<Guitar[]>(guitarUrl, httpConfig(token))
+                const url = `${guitarUrl}?page=${page}`;
+                return axios.get<Guitar[]>(url, httpConfig(token))
                     .then(response => {
                         LocalStorage.set(AppConstants.GUITARS, response.data).then();
                         return response.data;
@@ -118,10 +119,10 @@ export const webSocket = (token: string, onMessage: (data: MessageData) => void)
     ws.onmessage = messageEvent => {
         console.log('web socket onmessage');
         const data: MessageData = JSON.parse(messageEvent.data);
-        const { type, payload: item } = data;
+        const {type, payload: item} = data;
         if (type === 'created' || type === 'updated') {
             saveGuitarLocal(item).then();
-        } else if(type === 'deleted' && item._id) {
+        } else if (type === 'deleted' && item._id) {
             deleteGuitarLocal(item._id).then();
         }
         onMessage(data);

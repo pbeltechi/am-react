@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
-import {loginApi} from './authApi';
+import {loginApi} from './service/authApi';
 import {LocalStorage} from '../storage/Storage';
 import {AppConstants, noop} from '../core/Utils';
 

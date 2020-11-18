@@ -17,12 +17,14 @@ import {
     IonInfiniteScroll,
     IonInfiniteScrollContent,
     IonLabel,
-    IonList,
-    IonLoading,
     IonPage,
     IonRow,
+    IonSearchbar,
+    IonSelect,
+    IonSelectOption,
     IonTitle,
-    IonToolbar, useIonViewWillEnter
+    IonToolbar,
+    useIonViewWillEnter
 } from '@ionic/react';
 import {add} from 'ionicons/icons';
 import './GuitarList.css';
@@ -31,23 +33,43 @@ import {Guitar} from "../Guitar";
 import {RouteComponentProps} from "react-router";
 import {dateFormat, noop} from "../../core/Utils";
 import {AuthContext} from '../../auth';
+import {getAllGuitars} from '../service/GuitarService';
 
 const GuitarList: React.FC<RouteComponentProps> = ({history}) => {
-    const {items, fetching, fetchingError, deleteItem, page, setPage} = useContext(GuitarContext);
-    const [guitars, setGuitars] = useState<Guitar[]>([]);
-    const {logout} = useContext(AuthContext);
-    useEffect(setNewGuitarsEffect,[items]);
+    const {items, setItems, fetchingError, deleteItem, page, setPage, filter, setFilter, search, setSearch} =
+        useContext(GuitarContext);
+    const {token, logout} = useContext(AuthContext);
+    const [models, setModels] = useState<string[]>([]);
 
-    function setNewGuitarsEffect() {
-        setGuitars([...guitars, ...items || []]);
+    useEffect(getGuitarModels,[token]);
+
+    function getGuitarModels() {
+        fetchModels().then();
+    }
+    async function fetchModels() {
+        const guitars: Guitar[] = await getAllGuitars(token);
+        const models = guitars.map(guitar => guitar.model);
+        models.unshift('remove filter');
+        const uniq = models.filter((item, pos) => models.indexOf(item) == pos);
+        setModels(uniq);
     }
 
-    function getNewItems($event: CustomEvent<void>) {
-        if(setPage){
-            setPage(page +1);
-        }
-        console.log($event);
+    async function getNewItems($event: CustomEvent<void>) {
+        console.log('page:', page);
+        setPage ? setPage(page + 1) : noop();
         ($event.target as HTMLIonInfiniteScrollElement).complete().then();
+    }
+
+    function filterChange(value: string) {
+        setFilter ? setFilter(value === 'remove filter' ? '' : value) : noop();
+        setItems ? setItems() : noop();
+        setPage ? setPage(0) : noop();
+    }
+
+    function searchChange(value: string){
+        setSearch ? setSearch(value) : noop();
+        setItems ? setItems() : noop();
+        setPage ? setPage(0) : noop();
     }
 
     return (
@@ -59,18 +81,28 @@ const GuitarList: React.FC<RouteComponentProps> = ({history}) => {
                 </IonToolbar>
             </IonHeader>
             <IonContent fullscreen>
-                {guitars && (
-                    guitars.map(item =>
-                                <GuitarItem key={item._id} guitar={item} onEdit={id => history.push(`/guitar/${id}`)}
-                                            onDelete={id => deleteItem ? deleteItem(id) : noop()}/>
-                            // <GuitarItemDebug key={item._id} guitar={item} onEdit={id => history.push(`/guitar/${id}`)}
-                            // onDelete={id => deleteItem ? deleteItem(id) : noop()}/>
-                        )
+                <IonSelect value={filter} placeholder="Select model"
+                           onIonChange={e => filterChange(e.detail.value)}>
+                    {models.map((model, i) =>
+                        <IonSelectOption key={i} value={model}>{model}</IonSelectOption>)}
+                </IonSelect>
+                <IonSearchbar
+                    value={search}
+                    debounce={1000}
+                    onIonChange={e => searchChange(e.detail.value!)}>
+                </IonSearchbar>
+                {items && (
+                    items.map(item =>
+                            <GuitarItem key={item._id} guitar={item} onEdit={id => history.push(`/guitar/${id}`)}
+                                        onDelete={id => deleteItem ? deleteItem(id) : noop()}/>
+                        // <GuitarItemDebug key={item._id} guitar={item} onEdit={id => history.push(`/guitar/${id}`)}
+                        // onDelete={id => deleteItem ? deleteItem(id) : noop()}/>
+                    )
                 )}
                 <IonInfiniteScroll threshold="100px"
                                    onIonInfinite={(e: CustomEvent<void>) => getNewItems(e)}>
                     <IonInfiniteScrollContent
-                        loadingText="Loading more good doggos...">
+                        loadingText="Loading...">
                     </IonInfiniteScrollContent>
                 </IonInfiniteScroll>
                 {fetchingError && (
@@ -89,7 +121,7 @@ const GuitarList: React.FC<RouteComponentProps> = ({history}) => {
 export default GuitarList;
 
 
-const GuitarItem: React.FC<{ guitar: Guitar, onEdit: (id?: string) => void, onDelete: (id?: string) => void }> = ({guitar, onEdit, onDelete}) => {
+export const GuitarItem: React.FC<{ guitar: Guitar, onEdit: (id?: string) => void, onDelete: (id?: string) => void }> = ({guitar, onEdit, onDelete}) => {
     return (
         <IonCard>
             <IonCardHeader className={'guitar-header'} onClick={() => onEdit(guitar._id)}>
@@ -128,3 +160,28 @@ const GuitarItemDebug: React.FC<{ guitar: Guitar, onEdit: (id?: string) => void,
         </div>
     );
 };
+
+
+// const [disableInfiniteScroll, setDisableInfiniteScroll] = useState<boolean>(false);
+// const [guitars, setGuitars] = useState<Guitar[]>([]);
+
+// useEffect(setNewGuitarsEffect, [items]);
+
+// function setNewGuitarsEffect() {
+//     setPage(page + 1);
+//     if (items) {
+//         setDisableInfiniteScroll(items.length < 3);
+//         console.log(items);
+//         const allItems: Guitar[] = [...guitars];
+//         items
+//             .forEach((item: Guitar) => {
+//                 const index = allItems.findIndex((it: Guitar) => it._id === item._id);
+//                 if (index === -1) {
+//                     allItems.push(item);
+//                 } else {
+//                     allItems[index] = item;
+//                 }
+//             });
+//         setGuitars(allItems);
+//     }
+// }

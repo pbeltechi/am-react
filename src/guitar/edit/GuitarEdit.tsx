@@ -32,16 +32,18 @@ const GuitarEdit: React.FC<RouteComponentProps<{ id?: string }>> = ({history, ma
     const [producedOn, setProducedOn] = useState<string>(new Date().toString());
     const [available, setAvailable] = useState<boolean>(false);
     const isEditMode = match.params.id || false;
+
     useEffect(() => {
         const item = items?.find(it => it._id === match.params.id);
-        setItem(item);
         if (item) {
+            setItem(item);
             setModel(item.model);
             setPrice(item.price);
             setProducedOn(item.producedOn.toString());
             setAvailable(item.available);
         }
     }, [match.params.id, items]);
+
     const handleSave = () => {
         const editedItem = {...item, model, price, producedOn: new Date(), available};
         editedItem.producedOn = new Date(producedOn);
@@ -104,3 +106,14 @@ const GuitarEdit: React.FC<RouteComponentProps<{ id?: string }>> = ({history, ma
 };
 
 export default GuitarEdit;
+
+
+// let item = items?.find(it => it._id === match.params.id);
+// if (!item && match.params.id && getItem) {
+//     getItem(match.params.id)
+//         .then(() => {
+//             setGuitar();
+//         });
+// } else {
+//     setGuitar();
+// }

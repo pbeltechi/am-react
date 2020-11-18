@@ -1,26 +1,62 @@
 import axios from 'axios';
 import {Guitar} from "../Guitar";
 import {AppConstants, baseUrl, httpConfig, noop, wsUrl} from "../../core/Utils";
-import {Plugins} from '@capacitor/core';
 import {LocalStorage} from '../../storage/Storage';
+import {Plugins} from '@capacitor/core';
+
+const {Network} = Plugins;
 
 const {v4: uuidv4} = require('uuid');
-const {Network} = Plugins;
 
 const guitarUrl = `${baseUrl}/api/guitars`;
 
-export const getGuitars: (token: string, page: number) => Promise<Guitar[]> = (token: string, page: number) => {
+export const getAllGuitars: (token: string) => Promise<Guitar[]> = (token: string) => {
     return Network.getStatus()
         .then(status => {
             if (status.connected) {
-                const url = `${guitarUrl}?page=${page}`;
-                return axios.get<Guitar[]>(url, httpConfig(token))
+                return axios.get<Guitar[]>(guitarUrl, httpConfig(token))
+                    .then(response => response.data);
+            }
+            return getGuitarsLocal();
+        });
+};
+
+export const getGuitars: (token: string, page: number, filter?: string, search?: string) => Promise<Guitar[]> =
+    (token: string, page: number, filter?: string, search?: string) => {
+        return Network.getStatus()
+            .then(status => {
+                if (status.connected) {
+                    let url = `${guitarUrl}?page=${page}`;
+                    if (filter && filter !== '') {
+                        url += '&filter=' + filter;
+                    }
+                    if (search && search !== '') {
+                        url += '&search=' + search;
+                    }
+                    return axios.get<Guitar[]>(url, httpConfig(token))
+                        .then(response => {
+                            const guitars = response.data;
+                            guitars.forEach(guitar => LocalStorage.set(`${AppConstants.GUITARS}/${guitar._id}`, guitar));
+                            return guitars;
+                        });
+                }
+                return getGuitarsLocal().then(guitars => paginateAndMatch(guitars, page, filter, search));
+            });
+    };
+
+export const getGuitar: (token: string, id: string) => Promise<Guitar> = (token: string, id: string) => {
+    return Network.getStatus()
+        .then(status => {
+            if (status.connected) {
+                const url = `${guitarUrl}/${id}`;
+                return axios.get<Guitar>(url, httpConfig(token))
                     .then(response => {
-                        LocalStorage.set(AppConstants.GUITARS, response.data).then();
-                        return response.data;
+                        const guitar: Guitar = response.data;
+                        LocalStorage.set(`${AppConstants.GUITARS}/${guitar._id}`, guitar).then();
+                        return guitar;
                     });
             }
-            return LocalStorage.get(AppConstants.GUITARS);
+            return LocalStorage.get(`${AppConstants.GUITARS}/${id}`);
         });
 };
 
@@ -68,34 +104,54 @@ export const deleteGuitar: (id: string, token: string) => Promise<Guitar> = (id,
         });
 };
 
-function saveGuitarLocal(guitar: Guitar): Promise<Guitar> {
-    return LocalStorage.get(AppConstants.GUITARS)
-        .then((guitars: Guitar[]) => {
-            const index = guitars.findIndex(it => it._id === guitar?._id);
-            if (index === -1) {
-                guitars.splice(0, 0, guitar);
-                if (!guitar?._id) {
-                    guitar._id = uuidv4();
-                }
-            } else {
-                guitars[index] = guitar;
-            }
-            LocalStorage.set(AppConstants.GUITARS, guitars).then();
-            return guitar;
-        });
+const PAGE_SIZE = 3;
+
+function paginateAndMatch(guitars: Guitar[], page: number, filter?: string, search?: string): Guitar[] {
+    if (filter) {
+        guitars = guitars.filter(guitar => guitar.model === filter);
+    }
+    if (search) {
+        guitars = guitars.filter(guitar => guitar.model.indexOf(search) >= 0);
+    }
+    const resp: Guitar[] = [];
+    let i = 0;
+    guitars.forEach(guitar => {
+        if (i >= PAGE_SIZE * page && i < PAGE_SIZE * (page + 1)) {
+            resp.push(guitar);
+        }
+        i++;
+    });
+    return resp;
 }
 
-function deleteGuitarLocal(id: string): Promise<Guitar> {
-    return LocalStorage.get(AppConstants.GUITARS)
-        .then((guitars: Guitar[]) => {
-            const deletedIndex = guitars.findIndex(it => it._id === id);
-            const guitar = guitars[deletedIndex];
-            if (deletedIndex > -1) {
-                guitars.splice(deletedIndex, 1);
-            }
-            LocalStorage.set(AppConstants.GUITARS, guitars).then();
-            return guitar;
-        });
+async function getGuitarsLocal(): Promise<Guitar[]> {
+    const keys: string[] = await LocalStorage.keys();
+    const guitars = [];
+    for (const i in keys) {
+        const key = keys[i];
+        if (key.startsWith(AppConstants.GUITARS)) {
+            const guitar: Guitar = await LocalStorage.get(key);
+            guitars.push(guitar);
+        }
+    }
+    return guitars;
+}
+
+function saveGuitarLocal(guitar: Guitar): Promise<Guitar> {
+    if (!guitar?._id) {
+        guitar._id = uuidv4();
+    }
+    LocalStorage.set(`${AppConstants.GUITARS}/${guitar._id}`, guitar).then();
+    return Promise.resolve(guitar);
+}
+
+async function deleteGuitarLocal(id: string): Promise<Guitar> {
+    const key: string = `${AppConstants.GUITARS}/${id}`;
+    const guitar: Guitar = await LocalStorage.get(key);
+    if (guitar) {
+        LocalStorage.remove(key).then();
+    }
+    return guitar;
 }
 
 interface MessageData {

@@ -15,7 +15,10 @@ export const getAllGuitars: (token: string) => Promise<Guitar[]> = (token: strin
         .then(status => {
             if (status.connected) {
                 return axios.get<Guitar[]>(guitarUrl, httpConfig(token))
-                    .then(response => response.data);
+                    .then(
+                        response => response.data,
+                        () => getGuitarsLocal()
+                    );
             }
             return getGuitarsLocal();
         });
@@ -35,10 +38,14 @@ export const getGuitars: (token: string, page: number, filter?: string, search?:
                     }
                     return axios.get<Guitar[]>(url, httpConfig(token))
                         .then(response => {
-                            const guitars = response.data;
-                            guitars.forEach(guitar => LocalStorage.set(`${AppConstants.GUITARS}/${guitar._id}`, guitar));
-                            return guitars;
-                        });
+                                const guitars = response.data;
+                                guitars.forEach(guitar =>
+                                    LocalStorage.set(`${AppConstants.GUITARS}/${guitar._id}`, guitar));
+                                return guitars;
+                            },
+                            () => getGuitarsLocal()
+                                .then(guitars => paginateAndMatch(guitars, page, filter, search))
+                        );
                 }
                 return getGuitarsLocal().then(guitars => paginateAndMatch(guitars, page, filter, search));
             });
@@ -50,11 +57,14 @@ export const getGuitar: (token: string, id: string) => Promise<Guitar> = (token:
             if (status.connected) {
                 const url = `${guitarUrl}/${id}`;
                 return axios.get<Guitar>(url, httpConfig(token))
-                    .then(response => {
-                        const guitar: Guitar = response.data;
-                        LocalStorage.set(`${AppConstants.GUITARS}/${guitar._id}`, guitar).then();
-                        return guitar;
-                    });
+                    .then(
+                        response => {
+                            const guitar: Guitar = response.data;
+                            LocalStorage.set(`${AppConstants.GUITARS}/${guitar._id}`, guitar).then();
+                            return guitar;
+                        },
+                        () => LocalStorage.get(`${AppConstants.GUITARS}/${id}`)
+                    );
             }
             return LocalStorage.get(`${AppConstants.GUITARS}/${id}`);
         });
@@ -65,10 +75,13 @@ export const insertGuitar: (guitar: Guitar, token: string) => Promise<Guitar> = 
         .then(status => {
             if (status.connected) {
                 return axios.post<Guitar>(guitarUrl, guitar, httpConfig(token))
-                    .then(response => {
-                        saveGuitarLocal(response.data).then();
-                        return response.data;
-                    });
+                    .then(
+                        response => {
+                            saveGuitarLocal(response.data).then();
+                            return response.data;
+                        },
+                        () => saveGuitarLocal(guitar)
+                    );
             }
             return saveGuitarLocal(guitar);
         });
@@ -80,10 +93,13 @@ export const updateGuitar: (guitar: Guitar, token: string) => Promise<Guitar> = 
             if (status.connected) {
                 const url = `${guitarUrl}/${guitar._id}`;
                 axios.put<Guitar>(url, guitar, httpConfig(token))
-                    .then(response => {
-                        saveGuitarLocal(guitar).then();
-                        return response.data;
-                    });
+                    .then(
+                        response => {
+                            saveGuitarLocal(guitar).then();
+                            return response.data;
+                        },
+                        () => saveGuitarLocal(guitar)
+                    );
             }
             return saveGuitarLocal(guitar);
         });
@@ -95,10 +111,12 @@ export const deleteGuitar: (id: string, token: string) => Promise<Guitar> = (id,
             if (status.connected) {
                 const url = `${guitarUrl}/${id}`;
                 return axios.delete<Guitar>(url, httpConfig(token))
-                    .then(response => {
-                        response.data?._id ? deleteGuitarLocal(response.data._id).then() : noop();
-                        return response.data;
-                    });
+                    .then(
+                        response => {
+                            response.data?._id ? deleteGuitarLocal(response.data._id).then() : noop();
+                            return response.data;
+                        },
+                        () => deleteGuitarLocal(id));
             }
             return deleteGuitarLocal(id);
         });

@@ -23,8 +23,7 @@ import {
     IonSelect,
     IonSelectOption,
     IonTitle,
-    IonToolbar,
-    useIonViewWillEnter
+    IonToolbar
 } from '@ionic/react';
 import {add} from 'ionicons/icons';
 import './GuitarList.css';
@@ -41,11 +40,12 @@ const GuitarList: React.FC<RouteComponentProps> = ({history}) => {
     const {token, logout} = useContext(AuthContext);
     const [models, setModels] = useState<string[]>([]);
 
-    useEffect(getGuitarModels,[token]);
+    useEffect(getGuitarModels, [token]);
 
     function getGuitarModels() {
         fetchModels().then();
     }
+
     async function fetchModels() {
         const guitars: Guitar[] = await getAllGuitars(token);
         const models = guitars.map(guitar => guitar.model);
@@ -66,7 +66,7 @@ const GuitarList: React.FC<RouteComponentProps> = ({history}) => {
         setPage ? setPage(0) : noop();
     }
 
-    function searchChange(value: string){
+    function searchChange(value: string) {
         setSearch ? setSearch(value) : noop();
         setItems ? setItems() : noop();
         setPage ? setPage(0) : noop();

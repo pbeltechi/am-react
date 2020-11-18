@@ -206,7 +206,7 @@ export const GuitarProvider: React.FC<{ children: PropTypes.ReactNodeLike }> = (
     }
 
     function resetItemsCallback() {
-        dispatch({type: RESET_ITEMS});
+        dispatch({type: RESET_ITEMS}); // used for search and filter
     }
 
     function wsEffect() {

@@ -1,7 +1,15 @@
 import React, {useCallback, useContext, useEffect, useReducer, useState} from "react";
 import {Guitar} from "./Guitar";
 import PropTypes from 'prop-types';
-import {deleteGuitar, getGuitar, getGuitars, insertGuitar, updateGuitar, webSocket} from "./service/GuitarService";
+import {
+    deleteGuitar,
+    getGuitar,
+    getGuitars,
+    insertGuitar,
+    syncData,
+    updateGuitar,
+    webSocket
+} from "./service/GuitarService";
 import {ItemsState} from "../core/Utils";
 import {AuthContext} from '../auth';
 import {Plugins} from '@capacitor/core';
@@ -90,14 +98,16 @@ export const GuitarProvider: React.FC<{ children: PropTypes.ReactNodeLike }> = (
     const [page, setPage] = useState<number>(0);
     const [filter, setFilter] = useState<string>('');
     const [search, setSearch] = useState<string>('');
-    useEffect(getGuitarsEffect, [token, page, filter, search]);
-    useEffect(networkEffect, []);
+    const [settingsSavedOffline, setSettingsSavedOffline] = useState<boolean>(false);
+    const [conflictGuitars, setConflictGuitars] = useState<Guitar[]>([]);
+    useEffect(getGuitarsEffect, [token, page, filter, search, connectedNetworkStatus]);
+    useEffect(networkEffect, [token]);
     useEffect(wsEffect, [token, connectedNetworkStatus]);
-    const saveItem = useCallback(saveGuitarCallback, [token]);
+    const saveItem = useCallback(saveGuitarCallback, [token, connectedNetworkStatus, setSettingsSavedOffline]);
     // const getItems = useCallback(fetchGuitars, [token]);
     const setItems = useCallback(resetItemsCallback, []);
-    const getItem = useCallback(getGuitarCallback, [token]);
-    const deleteItem = useCallback(deleteGuitarCallback, [token]);
+    const getItem = useCallback(getGuitarCallback, [token, connectedNetworkStatus]);
+    const deleteItem = useCallback(deleteGuitarCallback, [token, connectedNetworkStatus, setSettingsSavedOffline]);
     const value = {
         items,
         setItems,
@@ -116,7 +126,12 @@ export const GuitarProvider: React.FC<{ children: PropTypes.ReactNodeLike }> = (
         search,
         setSearch,
         filter,
-        setFilter
+        setFilter,
+        connectedNetworkStatus,
+        settingsSavedOffline,
+        setSettingsSavedOffline,
+        conflictGuitars,
+        // setConflictGuitars
     };
     return (
         <GuitarContext.Provider value={value}>
@@ -126,11 +141,16 @@ export const GuitarProvider: React.FC<{ children: PropTypes.ReactNodeLike }> = (
 
     function networkEffect() {
         let canceled = false;
-        Network.addListener('networkStatusChange', (status) => {
+        Network.addListener('networkStatusChange', async (status) => {
             if (canceled) {
                 return;
             }
-            setConnectedNetworkStatus(status.connected);
+            const connected: boolean = status.connected;
+            if (connected) {
+                const conflicts = await syncData(token);
+                setConflictGuitars(conflicts);
+            }
+            setConnectedNetworkStatus(connected);
             console.log("Network status changed", status);
         });
         return () => {
@@ -146,12 +166,12 @@ export const GuitarProvider: React.FC<{ children: PropTypes.ReactNodeLike }> = (
         };
 
         async function fetchGuitars() {
+            if (!isAuthenticated) {
+                return;
+            }
             try {
-                if (!isAuthenticated) {
-                    return;
-                }
                 dispatch({type: FETCH_ITEMS_STARTED});
-                const data = await getGuitars(token, page, filter, search);
+                const data = await getGuitars(token, connectedNetworkStatus, page, filter, search);
                 console.log(data);
                 if (!canceled) {
                     dispatch({type: FETCH_ITEMS_SUCCEEDED, payload: {data}});
@@ -162,24 +182,16 @@ export const GuitarProvider: React.FC<{ children: PropTypes.ReactNodeLike }> = (
         }
     }
 
-    // async function fetchGuitars(page: number) {
-    //     try {
-    //         if (!isAuthenticated) {
-    //             return;
-    //         }
-    //         dispatch({type: FETCH_ITEMS_STARTED});
-    //         const data = await getGuitars(token, page);
-    //         dispatch({type: FETCH_ITEMS_SUCCEEDED, payload: {data}});
-    //     } catch (error) {
-    //         dispatch({type: FETCH_ITEMS_FAILED, payload: {error}});
-    //     }
-    // }
-
     async function saveGuitarCallback(guitar: Guitar) {
         try {
             dispatch({type: SAVE_ITEM_STARTED});
-            const data = await (guitar._id ? updateGuitar(guitar, token) : insertGuitar(guitar, token));
+            const data = await (guitar._id
+                ? updateGuitar(guitar, connectedNetworkStatus, token)
+                : insertGuitar(guitar, connectedNetworkStatus, token));
             dispatch({type: SAVE_ITEM_SUCCEEDED, payload: {item: data}});
+            if (!connectedNetworkStatus) {
+                setSettingsSavedOffline(true);
+            }
         } catch (error) {
             dispatch({type: SAVE_ITEM_FAILED, payload: {error}});
         }
@@ -188,7 +200,7 @@ export const GuitarProvider: React.FC<{ children: PropTypes.ReactNodeLike }> = (
     async function getGuitarCallback(id: string) {
         try {
             dispatch({type: SAVE_ITEM_STARTED});
-            const data = await getGuitar(token, id);
+            const data = await getGuitar(token, connectedNetworkStatus, id);
             dispatch({type: SAVE_ITEM_SUCCEEDED, payload: {item: data}});
         } catch (error) {
             dispatch({type: SAVE_ITEM_FAILED, payload: {error}});
@@ -198,8 +210,11 @@ export const GuitarProvider: React.FC<{ children: PropTypes.ReactNodeLike }> = (
     async function deleteGuitarCallback(id: string) {
         try {
             dispatch({type: DELETE_ITEM_STARTED});
-            const data = await deleteGuitar(id, token);
+            const data = await deleteGuitar(id, connectedNetworkStatus, token);
             dispatch({type: DELETE_ITEM_SUCCEEDED, payload: {item: data}});
+            if (!connectedNetworkStatus) {
+                setSettingsSavedOffline(true);
+            }
         } catch (error) {
             dispatch({type: DELETE_ITEM_FAILED, payload: {error}});
         }

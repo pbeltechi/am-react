@@ -23,6 +23,7 @@ import {
     IonSelect,
     IonSelectOption,
     IonTitle,
+    IonToast,
     IonToolbar
 } from '@ionic/react';
 import {add} from 'ionicons/icons';
@@ -37,20 +38,30 @@ import {getAllGuitars} from '../service/GuitarService';
 const GuitarList: React.FC<RouteComponentProps> = ({history}) => {
     const {items, setItems, fetchingError, deleteItem, page, setPage, filter, setFilter, search, setSearch} =
         useContext(GuitarContext);
+    const {connectedNetworkStatus, settingsSavedOffline, setSettingsSavedOffline} = useContext(GuitarContext);
+    const {conflictGuitars} = useContext(GuitarContext);
     const {token, logout} = useContext(AuthContext);
     const [models, setModels] = useState<string[]>([]);
 
-    useEffect(getGuitarModels, [token]);
+    useEffect(getGuitarModels, [token, connectedNetworkStatus]);
+    useEffect(conflictGuitarsEffect, [conflictGuitars]);
+
+    function conflictGuitarsEffect() {
+        console.log('conflictGuitars', conflictGuitars);
+        if(conflictGuitars && conflictGuitars.length > 0) {
+            history.push('/guitars/conflict');
+        }
+    }
 
     function getGuitarModels() {
         fetchModels().then();
     }
 
     async function fetchModels() {
-        const guitars: Guitar[] = await getAllGuitars(token);
+        const guitars: Guitar[] = await getAllGuitars(token, connectedNetworkStatus || false);
         const models = guitars.map(guitar => guitar.model);
         models.unshift('remove filter');
-        const uniq = models.filter((item, pos) => models.indexOf(item) == pos);
+        const uniq = models.filter((item, pos) => models.indexOf(item) === pos);
         setModels(uniq);
     }
 
@@ -94,7 +105,9 @@ const GuitarList: React.FC<RouteComponentProps> = ({history}) => {
                 {items && (
                     items.map(item =>
                             <GuitarItem key={item._id} guitar={item} onEdit={id => history.push(`/guitar/${id}`)}
-                                        onDelete={id => deleteItem ? deleteItem(id) : noop()}/>
+                                        onDelete={id => {
+                                            deleteItem ? deleteItem(id) : noop();
+                                        }}/>
                         // <GuitarItemDebug key={item._id} guitar={item} onEdit={id => history.push(`/guitar/${id}`)}
                         // onDelete={id => deleteItem ? deleteItem(id) : noop()}/>
                     )
@@ -113,6 +126,23 @@ const GuitarList: React.FC<RouteComponentProps> = ({history}) => {
                         <IonIcon icon={add}/>
                     </IonFabButton>
                 </IonFab>
+                <IonToast
+                    isOpen={settingsSavedOffline ? settingsSavedOffline : false}
+                    onDidDismiss={() => setSettingsSavedOffline ? setSettingsSavedOffline(false) : noop()}
+                    message="Your settings have been saved locally since you're not connected to internet"
+                    duration={2000}
+                />
+                <IonToast
+                    isOpen={!connectedNetworkStatus || false}
+                    position="top"
+                    message="You are using this app in offline mode"
+                />
+                <IonToast
+                    cssClass={'first-time-toast'}
+                    isOpen={true}
+                    message="Welcome back"
+                    duration={10}
+                />
             </IonContent>
         </IonPage>
     );

@@ -1,4 +1,5 @@
 import moment from "moment";
+import {Guitar} from '../guitar/Guitar';
 
 export const baseUrl = 'http://localhost:3000';
 export const wsUrl = 'ws://localhost:3000';
@@ -21,7 +22,7 @@ export interface ItemsState<T> {
     deleting: boolean,
     deletingError?: Error | null,
     saveItem?: Function,
-    getItems?: (page: number) => Promise<void>,
+    getItems?: Function,
     getItem?: (id: string) => Promise<void>,
     deleteItem?: Function,
     setPage?: Function
@@ -29,7 +30,12 @@ export interface ItemsState<T> {
     search?: string
     setSearch?: Function
     filter?: string
-    setFilter? :Function
+    setFilter? :Function,
+    connectedNetworkStatus?: boolean
+    setSettingsSavedOffline?: Function,
+    settingsSavedOffline?: boolean
+    conflictGuitars?: Guitar[];
+    setConflictGuitars?: Function
 }
 
 export const dateFormat = (date: Date) => {

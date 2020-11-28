@@ -25,6 +25,7 @@ import GuitarList from "./guitar/list/GuitarList";
 import GuitarEdit from "./guitar/edit/GuitarEdit";
 import {GuitarProvider} from "./guitar/GuitarProvider";
 import {AuthProvider, Login, PrivateRoute} from './auth';
+import ConflictGuitar from './guitar/conflict/ConflictGuitar';
 
 const App: React.FC = () => (
     <IonApp>
@@ -33,6 +34,7 @@ const App: React.FC = () => (
                 <AuthProvider>
                     <Route path="/login" component={Login} exact={true}/>
                     <GuitarProvider>
+                        <PrivateRoute path="/guitars/conflict" component={ConflictGuitar}/>
                         <PrivateRoute path="/guitars" component={GuitarList} exact={true}/>
                         <PrivateRoute path="/guitar" component={GuitarEdit} exact={true}/>
                         <PrivateRoute path="/guitar/:id" component={GuitarEdit}/>

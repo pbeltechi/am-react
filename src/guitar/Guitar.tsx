@@ -4,4 +4,5 @@ export interface Guitar {
     model: string;
     producedOn: Date;
     available: boolean;
+    version: number;
 }

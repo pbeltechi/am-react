@@ -62,7 +62,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     }
 
     function getInitialStateEffect() {
-        console.log('getInitialStateEffect');
         let canceled = false;
         LocalStorage.get(AppConstants.TOKEN)
             .then(token =>

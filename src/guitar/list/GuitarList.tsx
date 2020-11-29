@@ -47,8 +47,8 @@ const GuitarList: React.FC<RouteComponentProps> = ({history}) => {
     useEffect(conflictGuitarsEffect, [conflictGuitars]);
 
     function conflictGuitarsEffect() {
-        console.log('conflictGuitars', conflictGuitars);
         if(conflictGuitars && conflictGuitars.length > 0) {
+            console.log('conflictGuitars', conflictGuitars);
             history.push('/guitars/conflict');
         }
     }

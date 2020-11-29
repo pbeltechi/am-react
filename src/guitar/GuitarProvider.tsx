@@ -101,7 +101,7 @@ export const GuitarProvider: React.FC<{ children: PropTypes.ReactNodeLike }> = (
     const [settingsSavedOffline, setSettingsSavedOffline] = useState<boolean>(false);
     const [conflictGuitars, setConflictGuitars] = useState<Guitar[]>([]);
     useEffect(getGuitarsEffect, [token, page, filter, search, connectedNetworkStatus]);
-    useEffect(networkEffect, [token]);
+    useEffect(networkEffect, [token, setConflictGuitars, setConnectedNetworkStatus]);
     useEffect(wsEffect, [token, connectedNetworkStatus]);
     const saveItem = useCallback(saveGuitarCallback, [token, connectedNetworkStatus, setSettingsSavedOffline]);
     // const getItems = useCallback(fetchGuitars, [token]);
@@ -172,7 +172,7 @@ export const GuitarProvider: React.FC<{ children: PropTypes.ReactNodeLike }> = (
             try {
                 dispatch({type: FETCH_ITEMS_STARTED});
                 const data = await getGuitars(token, connectedNetworkStatus, page, filter, search);
-                console.log(data);
+                console.log('GetAll',data);
                 if (!canceled) {
                     dispatch({type: FETCH_ITEMS_SUCCEEDED, payload: {data}});
                 }
@@ -225,7 +225,7 @@ export const GuitarProvider: React.FC<{ children: PropTypes.ReactNodeLike }> = (
     }
 
     function wsEffect() {
-        if (!connectedNetworkStatus) {
+        if (!connectedNetworkStatus || token === '') {
             return;
         }
         let canceled = false;

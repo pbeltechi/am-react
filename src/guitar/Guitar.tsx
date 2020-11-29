@@ -5,4 +5,5 @@ export interface Guitar {
     producedOn: Date;
     available: boolean;
     version: number;
+    lastModified: Date;
 }

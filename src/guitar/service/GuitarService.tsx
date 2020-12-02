@@ -8,14 +8,25 @@ const {v4: uuidv4} = require('uuid');
 const guitarUrl = `${baseUrl}/api/guitars`;
 
 export const syncData: (token: string) => Promise<Guitar[]> = async (token: string) => {
-    const guitars = await getGuitarsLocal('D');
-    return axios.post<Guitar[]>(`${guitarUrl}/sync`, guitars, httpConfig(token))
-        .then(
-            response => response.data,
-            () => {
-                console.log('cannot sync data with server');
-                return [];
-            });
+    const guitars = await getGuitarsLocal(`sync/${AppConstants.GUITARS}`);
+    console.log(guitars);
+    const conflictGuitars = [];
+    for (const i in guitars) {
+        const guitar = guitars[i];
+        if (guitar.version === -1) {
+            guitar._id ? await deleteGuitar(guitar._id, true, token) : noop();
+        } else if (guitar.version === 0) {
+            await insertGuitar(guitar, true, token);
+        } else {
+            const conflict = await updateGuitar(guitar, true, token);
+            if (conflict.hasConflicts) {
+                guitar.version = conflict.version;
+                conflictGuitars.push(guitar, conflict);
+            }
+        }
+        await LocalStorage.remove(`sync/${AppConstants.GUITARS}/${guitar._id}`);
+    }
+    return Promise.resolve(conflictGuitars);
 };
 
 export const getAllGuitars: (token: string, isNetworkAvailable: boolean) => Promise<Guitar[]> =
@@ -24,9 +35,9 @@ export const getAllGuitars: (token: string, isNetworkAvailable: boolean) => Prom
             ? axios.get<Guitar[]>(guitarUrl, httpConfig(token))
                 .then(
                     response => response.data,
-                    () => getGuitarsLocal()
+                    () => getGuitarsLocal(AppConstants.GUITARS)
                 )
-            : getGuitarsLocal();
+            : getGuitarsLocal(AppConstants.GUITARS);
     };
 
 function setIfModifiedSinceHeader(guitars: Guitar[], config: any): void {
@@ -57,7 +68,7 @@ export const getGuitars: (token: string,
             if (search && search !== '') {
                 url += '&search=' + search;
             }
-            const localGuitars = await getGuitarsLocal()
+            const localGuitars = await getGuitarsLocal(AppConstants.GUITARS)
                 .then(guitars => paginateAndMatch(guitars, page, filter, search));
             const config = httpConfig(token);
             setIfModifiedSinceHeader(localGuitars, config);
@@ -78,15 +89,15 @@ export const getGuitars: (token: string,
                     return localGuitars;
                 })
                 .catch(err => {
-                    if (err.response.status === 304) {
+                    if (err.response?.status === 304) {
                         console.log('304');
                         return localGuitars;
                     }
-                    return getGuitarsLocal()
+                    return getGuitarsLocal(AppConstants.GUITARS)
                         .then(guitars => paginateAndMatch(guitars, page, filter, search));
                 });
         }
-        return getGuitarsLocal().then(guitars => paginateAndMatch(guitars, page, filter, search));
+        return getGuitarsLocal(AppConstants.GUITARS).then(guitars => paginateAndMatch(guitars, page, filter, search));
     };
 
 export const getGuitar: (token: string, isNetworkAvailable: boolean, id: string) => Promise<Guitar> =
@@ -112,13 +123,13 @@ export const insertGuitar: (guitar: Guitar, isNetworkAvailable: boolean, token: 
             return axios.post<Guitar>(guitarUrl, guitar, httpConfig(token))
                 .then(
                     response => {
-                        saveGuitarLocal(response.data).then();
+                        saveGuitarLocal(response.data, isNetworkAvailable).then();
                         return response.data;
                     },
-                    () => saveGuitarLocal(guitar)
+                    () => saveGuitarLocal(guitar, false)
                 );
         }
-        return saveGuitarLocal(guitar);
+        return saveGuitarLocal(guitar, isNetworkAvailable);
     };
 
 export const updateGuitar: (guitar: Guitar, isNetworkAvailable: boolean, token: string) => Promise<Guitar> =
@@ -128,13 +139,20 @@ export const updateGuitar: (guitar: Guitar, isNetworkAvailable: boolean, token: 
             return axios.put<Guitar>(url, guitar, httpConfig(token))
                 .then(
                     response => {
-                        saveGuitarLocal(response.data).then();
+                        saveGuitarLocal(response.data, isNetworkAvailable).then();
                         return response.data;
-                    },
-                    () => saveGuitarLocal(guitar)
-                );
+                    }
+                )
+                .catch(err => {
+                    if (err.response?.status === 412) {
+                        const conflict: Guitar = err.response.data;
+                        conflict.hasConflicts = true;
+                        return Promise.resolve(conflict);
+                    }
+                    return saveGuitarLocal(guitar, false).then();
+                });
         }
-        return saveGuitarLocal(guitar);
+        return saveGuitarLocal(guitar, isNetworkAvailable);
     };
 
 export const deleteGuitar: (id: string, isNetworkAvailable: boolean, token: string) => Promise<Guitar> =
@@ -144,12 +162,12 @@ export const deleteGuitar: (id: string, isNetworkAvailable: boolean, token: stri
             return axios.delete<Guitar>(url, httpConfig(token))
                 .then(
                     response => {
-                        response.data?._id ? deleteGuitarLocal(response.data._id, true).then() : noop();
+                        response.data?._id ? deleteGuitarLocal(response.data._id, isNetworkAvailable).then() : noop();
                         return response.data;
                     },
-                    () => deleteGuitarLocal(id));
+                    () => deleteGuitarLocal(id, false));
         }
-        return deleteGuitarLocal(id);
+        return deleteGuitarLocal(id, isNetworkAvailable);
     };
 
 const PAGE_SIZE = 3;
@@ -173,13 +191,12 @@ function paginateAndMatch(guitars: Guitar[], page: number, filter?: string, sear
     return resp;
 }
 
-async function getGuitarsLocal(customPrefix?: string): Promise<Guitar[]> {
+async function getGuitarsLocal(keyIdentifier: string): Promise<Guitar[]> {
     const keys: string[] = await LocalStorage.keys();
     const guitars = [];
     for (const i in keys) {
         const key = keys[i];
-        if (key.startsWith(AppConstants.GUITARS)
-            || (customPrefix && key.startsWith(`${customPrefix}/${AppConstants.GUITARS}`))) {
+        if (key.startsWith(keyIdentifier)) {
             const guitar: Guitar = await LocalStorage.get(key);
             guitars.push(guitar);
         }
@@ -187,26 +204,26 @@ async function getGuitarsLocal(customPrefix?: string): Promise<Guitar[]> {
     return guitars;
 }
 
-function saveGuitarLocal(guitar: Guitar): Promise<Guitar> {
+export function saveGuitarLocal(guitar: Guitar, isNetworkAvailable: boolean): Promise<Guitar> {
     if (!guitar?._id) {
         guitar._id = uuidv4();
         guitar.version = 0;
     }
     LocalStorage.set(`${AppConstants.GUITARS}/${guitar._id}`, guitar).then();
+    if (!isNetworkAvailable) {
+        LocalStorage.set(`sync/${AppConstants.GUITARS}/${guitar._id}`, guitar).then();
+    }
     return Promise.resolve(guitar);
 }
 
-async function deleteGuitarLocal(id: string, networkCall?: boolean): Promise<Guitar> {
+export async function deleteGuitarLocal(id: string, isNetworkAvailable: boolean): Promise<Guitar> {
     const key: string = `${AppConstants.GUITARS}/${id}`;
     let guitar: Guitar = await LocalStorage.get(key);
-    if (!guitar) {
-        guitar = await LocalStorage.get(`D/${key}`);
-    }
     if (guitar) {
         LocalStorage.remove(key).then();
-        if (!networkCall) {
+        if (!isNetworkAvailable) {
             guitar.version = -1;
-            LocalStorage.set(`D/${key}`, guitar).then();
+            LocalStorage.set(`sync/${key}`, guitar).then();
         }
     }
     return guitar;
@@ -234,7 +251,7 @@ export const webSocket = (token: string, onMessage: (data: MessageData) => void)
         const data: MessageData = JSON.parse(messageEvent.data);
         const {type, payload: item} = data;
         if (type === 'created' || type === 'updated') {
-            saveGuitarLocal(item).then();
+            saveGuitarLocal(item, true).then();
         } else if (type === 'deleted' && item._id) {
             deleteGuitarLocal(item._id, true).then();
         }

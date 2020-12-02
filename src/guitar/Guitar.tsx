@@ -6,4 +6,5 @@ export interface Guitar {
     available: boolean;
     version: number;
     lastModified: Date;
+    hasConflicts?: boolean
 }

@@ -1,3 +1,5 @@
+import {Photo} from './Photo';
+
 export interface Guitar {
     _id?: string;
     price: number;
@@ -7,4 +9,7 @@ export interface Guitar {
     version: number;
     lastModified: Date;
     hasConflicts?: boolean
+    photo?: Photo
+    longitude?: number
+    latitude?: number
 }

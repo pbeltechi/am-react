@@ -11,3 +11,11 @@
     background: #000;
     border-radius: 3px;
 }
+
+.margin-left {
+    margin-left: 10px;
+}
+
+.map {
+    margin: 16px;
+}

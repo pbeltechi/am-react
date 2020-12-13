@@ -15,7 +15,8 @@ import {
     IonContent,
     IonGrid,
     IonHeader,
-    IonLoading,
+    IonImg,
+    IonLabel,
     IonPage,
     IonRow,
     IonTitle,
@@ -58,7 +59,6 @@ const ConflictGuitar: React.FC<RouteComponentProps> = ({history}) => {
                 {firstGuitar && (<GuitarConflictView guitar={firstGuitar} onAction={handleSave}/>)}
                 <div className={'guitar-header'}>VS</div>
                 {secondGuitar && (<GuitarConflictView guitar={secondGuitar} onAction={handleSave}/>)}
-                <IonLoading isOpen={saving}/>
                 {savingError && (
                     <div>{savingError.message || 'Failed to save item'}</div>
                 )}
@@ -94,6 +94,17 @@ export const GuitarConflictView:
                             <IonCol>
                                 <IonCheckbox color="primary" disabled={true} checked={guitar.available}/>
                             </IonCol>
+                        </IonRow>
+                        <IonRow>
+                            <IonCol class={'edit-row'}>
+                                <IonLabel>Photo</IonLabel>
+                                <IonCheckbox disabled={true} class={'margin-left'} checked={!!guitar.photo}/>
+                            </IonCol>
+                            {guitar.photo &&
+                            <IonCol size="6">
+                                <IonImg src={guitar.photo.data}/>
+                            </IonCol>
+                            }
                         </IonRow>
                     </IonGrid>
                     <IonButton onClick={() => onAction(guitar)} class={'action-button'}>Accept this version</IonButton>

@@ -14,6 +14,7 @@ import {
     IonGrid,
     IonHeader,
     IonIcon,
+    IonImg,
     IonInfiniteScroll,
     IonInfiniteScrollContent,
     IonLabel,
@@ -47,7 +48,7 @@ const GuitarList: React.FC<RouteComponentProps> = ({history}) => {
     useEffect(conflictGuitarsEffect, [conflictGuitars]);
 
     function conflictGuitarsEffect() {
-        if(conflictGuitars && conflictGuitars.length > 0) {
+        if (conflictGuitars && conflictGuitars.length > 0) {
             console.log('conflictGuitars', conflictGuitars);
             history.push('/guitars/conflict');
         }
@@ -151,7 +152,11 @@ const GuitarList: React.FC<RouteComponentProps> = ({history}) => {
 export default GuitarList;
 
 
-export const GuitarItem: React.FC<{ guitar: Guitar, onEdit: (id?: string) => void, onDelete: (id?: string) => void }> = ({guitar, onEdit, onDelete}) => {
+export const GuitarItem: React.FC<{ guitar: Guitar, onEdit: (id?: string) => void, onDelete: (id?: string) => void }> = ({
+                                                                                                                             guitar,
+                                                                                                                             onEdit,
+                                                                                                                             onDelete
+                                                                                                                         }) => {
     return (
         <IonCard>
             <IonCardHeader className={'guitar-header'} onClick={() => onEdit(guitar._id)}>
@@ -174,6 +179,17 @@ export const GuitarItem: React.FC<{ guitar: Guitar, onEdit: (id?: string) => voi
                             <IonCheckbox color="primary" disabled={true} checked={guitar.available}/>
                         </IonCol>
                     </IonRow>
+                    <IonRow>
+                        <IonCol class={'edit-row'}>
+                            <IonLabel>Photo</IonLabel>
+                            <IonCheckbox disabled={true} class={'margin-left'} checked={!!guitar.photo}/>
+                        </IonCol>
+                        {guitar.photo &&
+                        <IonCol size="6">
+                            <IonImg src={guitar.photo.data}/>
+                        </IonCol>
+                        }
+                    </IonRow>
                 </IonGrid>
                 <IonButton onClick={() => onDelete(guitar._id)} class={'action-button'}>Delete</IonButton>
             </IonCardContent>
@@ -181,7 +197,11 @@ export const GuitarItem: React.FC<{ guitar: Guitar, onEdit: (id?: string) => voi
     );
 };
 
-const GuitarItemDebug: React.FC<{ guitar: Guitar, onEdit: (id?: string) => void, onDelete: (id?: string) => void }> = ({guitar, onEdit, onDelete}) => {
+const GuitarItemDebug: React.FC<{ guitar: Guitar, onEdit: (id?: string) => void, onDelete: (id?: string) => void }> = ({
+                                                                                                                           guitar,
+                                                                                                                           onEdit,
+                                                                                                                           onDelete
+                                                                                                                       }) => {
     return (
         <div onClick={() => onEdit(guitar._id)}>
             <IonLabel>{guitar.model} {guitar.price} {dateFormat(guitar.producedOn)} {guitar.available}</IonLabel>

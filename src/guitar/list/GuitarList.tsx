@@ -190,6 +190,14 @@ export const GuitarItem: React.FC<{ guitar: Guitar, onEdit: (id?: string) => voi
                         </IonCol>
                         }
                     </IonRow>
+                    {guitar.longitude && guitar.latitude &&
+                    <IonRow>
+                        <IonCol>
+                            <a href={`https://www.google.ro/maps/@${guitar.latitude},${guitar.longitude},8z`}
+                               target={'_blank'}>Guitar location</a>
+                        </IonCol>
+                    </IonRow>
+                    }
                 </IonGrid>
                 <IonButton onClick={() => onDelete(guitar._id)} class={'action-button'}>Delete</IonButton>
             </IonCardContent>

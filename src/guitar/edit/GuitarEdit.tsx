@@ -43,10 +43,15 @@ const GuitarEdit: React.FC<RouteComponentProps<{ id?: string }>> = ({history, ma
     const [producedOn, setProducedOn] = useState<string>(new Date().toString());
     const [available, setAvailable] = useState<boolean>(false);
     const [photo, setPhoto] = useState<Photo>();
-    const [lat, setLat] = useState<number>(45.943161);
-    const [long, setLong] = useState<number>(24.966761);
     const isEditMode = match.params.id || false;
     const {writeFile} = useFilesystem();
+    const [lat, setLat] = useState<number>(21);
+    const [long, setLong] = useState<number>(45);
+
+    const handleMapClick = (e: any) => {
+        setLat(e.latLng.lat());
+        setLong(e.latLng.lng());
+    };
 
     useEffect(() => {
         const item = items?.find(it => it._id === match.params.id);
@@ -194,13 +199,14 @@ const GuitarEdit: React.FC<RouteComponentProps<{ id?: string }>> = ({history, ma
                     <MyMap
                         lat={lat}
                         lng={long}
+                        onMapClick={(e: any) => handleMapClick(e)}
                     />
                 </div>
                 <div className={'button-container'}>
                     <IonButton className={'action-button'} onClick={handleSave}>Save</IonButton>
                 </div>
                 <IonFab vertical="bottom" horizontal="start" slot="fixed">
-                    <IonFabButton onClick={() => takePhoto()}>
+                    <IonFabButton color={'tertiary'} onClick={() => takePhoto()}>
                         <IonIcon icon={camera}/>
                     </IonFabButton>
                 </IonFab>

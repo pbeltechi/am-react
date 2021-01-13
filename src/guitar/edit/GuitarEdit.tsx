@@ -1,5 +1,6 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {
+    createAnimation,
     IonBackButton,
     IonButton,
     IonButtons,
@@ -69,6 +70,31 @@ const GuitarEdit: React.FC<RouteComponentProps<{ id?: string }>> = ({history, ma
         }
     }, [match.params.id, items]);
 
+    useEffect(chainedAnimation, [items]);
+
+    function chainedAnimation() {
+        animate().then();
+
+        async function animate() {
+            const elements = document.querySelectorAll('.square-a');
+            if (!elements) {
+                return;
+            }
+            for (let i = 0; i < elements.length; i++) {
+                const animation = createAnimation()
+                    .addElement(elements[i])
+                    .fill('none')
+                    .duration(500)
+                    .keyframes([
+                        {offset: 0, transform: 'scale(1)', opacity: '1'},
+                        {offset: 0.5, transform: 'scale(1.2)', opacity: '0.3'},
+                        {offset: 1, transform: 'scale(1)', opacity: '1'}
+                    ]);
+                await animation.play();
+            }
+        }
+    }
+
     const handleSave = () => {
         const editedItem: any = {
             ...item,
@@ -127,17 +153,17 @@ const GuitarEdit: React.FC<RouteComponentProps<{ id?: string }>> = ({history, ma
                 <IonCard>
                     <IonCardContent>
                         <IonGrid>
-                            <IonRow class={'edit-row'}>
+                            <IonRow class={'edit-row square-a'}>
                                 <IonCol><IonLabel>Model</IonLabel></IonCol>
                                 <IonCol><IonInput value={model} className={'input'}
                                                   onIonChange={e => setModel(e.detail.value || '')}/></IonCol>
                             </IonRow>
-                            <IonRow class={'edit-row'}>
+                            <IonRow class={'edit-row square-a'}>
                                 <IonCol><IonLabel>Price</IonLabel></IonCol>
                                 <IonCol><IonInput type="number" value={price} className={'input'}
                                                   onIonChange={e => setPrice(+(e.detail.value || 0))}/></IonCol>
                             </IonRow>
-                            <IonRow class={'edit-row'}>
+                            <IonRow class={'edit-row square-a'}>
                                 <IonCol><IonLabel>Produced on</IonLabel></IonCol>
                                 <IonCol><IonDatetime
                                     className={'date-input'}
@@ -145,12 +171,12 @@ const GuitarEdit: React.FC<RouteComponentProps<{ id?: string }>> = ({history, ma
                                     value={producedOn} onIonChange={e => setProducedOn(e.detail.value!)}/>
                                 </IonCol>
                             </IonRow>
-                            <IonRow class={'edit-row'}>
+                            <IonRow class={'edit-row square-a'}>
                                 <IonCol><IonLabel>Available</IonLabel></IonCol>
                                 <IonCol><IonCheckbox checked={available}
                                                      onIonChange={e => setAvailable(e.detail.checked)}/></IonCol>
                             </IonRow>
-                            <IonRow class={'edit-row'}>
+                            <IonRow class={'edit-row square-a'}>
                                 <IonCol class={'edit-row'}>
                                     <IonLabel>Photo</IonLabel>
                                     <IonCheckbox disabled={true} class={'margin-left'} checked={!!photo}/>
@@ -161,12 +187,7 @@ const GuitarEdit: React.FC<RouteComponentProps<{ id?: string }>> = ({history, ma
                                 </IonCol>
                                 }
                             </IonRow>
-                            <IonRow>
-                                <IonCol class={'edit-row'}>
-                                    <IonLabel>Location</IonLabel>
-                                </IonCol>
-                            </IonRow>
-                            <IonRow>
+                            <IonRow class={'square-a'}>
                                 <IonCol class={'edit-row'}>
                                     <IonLabel>Latitude</IonLabel>
                                 </IonCol>
@@ -175,7 +196,7 @@ const GuitarEdit: React.FC<RouteComponentProps<{ id?: string }>> = ({history, ma
                                               onIonChange={e => setLat(+(e.detail.value || 0))}/>
                                 </IonCol>
                             </IonRow>
-                            <IonRow>
+                            <IonRow class={'square-a'}>
                                 <IonCol class={'edit-row'}>
                                     <IonLabel>Longitude</IonLabel>
                                 </IonCol>

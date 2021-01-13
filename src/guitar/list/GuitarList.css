@@ -5,3 +5,14 @@
 .first-time-toast {
     display: none;
 }
+
+.maps-link {
+    display: flex;
+    align-content: center;
+}
+
+.icon {
+    margin-right: 10px;
+    width: 20px;
+    height: 20px;
+}

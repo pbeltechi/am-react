@@ -1,5 +1,6 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {
+    createAnimation,
     IonButton,
     IonCard,
     IonCardContent,
@@ -46,6 +47,58 @@ const GuitarList: React.FC<RouteComponentProps> = ({history}) => {
 
     useEffect(getGuitarModels, [token, connectedNetworkStatus]);
     useEffect(conflictGuitarsEffect, [conflictGuitars]);
+    useEffect(simpleAnimation, [items]);
+    useEffect(groupedAnimation, [items]);
+
+    function simpleAnimation() {
+        const elems = document.querySelectorAll('.maps-link');
+        if (elems) {
+            elems.forEach(el =>
+                createAnimation()
+                    .addElement(el)
+                    .duration(1000)
+                    .direction('alternate')
+                    .iterations(Infinity)
+                    .keyframes([
+                        {offset: 0, transform: 'translateX(0px)', opacity: '1'},
+                        {offset: 1, transform: 'translateX(20px)', opacity: '0.8'}
+                    ])
+                    .play()
+                    .then()
+            );
+        }
+    }
+
+    function groupedAnimation() {
+        const el1 = document.querySelectorAll('.square-a');
+        const el2 = document.querySelectorAll('.square-b');
+        if (!el1 || !el2) {
+            return;
+        }
+        for (let i = 0; i < el1.length && i < el2.length; i++) {
+            const squareA = createAnimation()
+                .addElement(el1[i])
+                .keyframes([
+                    {offset: 0, transform: 'rotate(0) scale(1)'},
+                    {offset: 0.15, transform: 'rotate(180deg) scale(1.3)'},
+                    {offset: 0.3, transform: 'rotate(360deg) scale(1)'},
+                    {offset: 1, transform: 'rotate(360deg)'}
+                ]);
+            const squareB = createAnimation()
+                .addElement(el2[i])
+                .keyframes([
+                    {offset: 0, transform: 'scale(1)'},
+                    {offset: 0.15, transform: 'scale(1.2)'},
+                    {offset: 0.3, transform: 'scale(1)'},
+                ]);
+            createAnimation()
+                .duration(2000)
+                .iterations(Infinity)
+                .addAnimation([squareA, squareB])
+                .play()
+                .then();
+        }
+    }
 
     function conflictGuitarsEffect() {
         if (conflictGuitars && conflictGuitars.length > 0) {
@@ -83,6 +136,25 @@ const GuitarList: React.FC<RouteComponentProps> = ({history}) => {
         setItems ? setItems() : noop();
         setPage ? setPage(0) : noop();
     }
+
+    const enterAnimation = (baseEl: any) => {
+        const base = baseEl.querySelector('.toast-wrapper')!;
+        const wrapperAnimation = createAnimation()
+            .addElement(base)
+            .keyframes([
+                {offset: 0, opacity: '0', transform: 'translateY(100px)'},
+                {offset: 1, opacity: '1', transform: 'translateX(6px) translateY(6px)'}
+            ]);
+        return createAnimation()
+            .addElement(base)
+            .easing('ease-out')
+            .duration(1000)
+            .addAnimation(wrapperAnimation);
+    };
+
+    const leaveAnimation = (baseEl: any) => {
+        return enterAnimation(baseEl).direction('reverse');
+    };
 
     return (
         <IonPage>
@@ -133,10 +205,12 @@ const GuitarList: React.FC<RouteComponentProps> = ({history}) => {
                     message="Your settings have been saved locally since you're not connected to internet"
                     duration={2000}
                 />
-                <IonToast
-                    isOpen={!connectedNetworkStatus || false}
-                    position="top"
-                    message="You are using this app in offline mode"
+                <IonToast cssClass={'toast'}
+                          enterAnimation={enterAnimation}
+                          leaveAnimation={leaveAnimation}
+                          isOpen={!connectedNetworkStatus || false}
+                          position="top"
+                          message="You are using this app in offline mode"
                 />
                 <IonToast
                     cssClass={'first-time-toast'}
@@ -174,9 +248,9 @@ export const GuitarItem: React.FC<{ guitar: Guitar, onEdit: (id?: string) => voi
                         <IonCol>{dateFormat(guitar.producedOn)}</IonCol>
                     </IonRow>
                     <IonRow>
-                        <IonCol>Available</IonCol>
+                        <IonCol class={'square-b'}>Available</IonCol>
                         <IonCol>
-                            <IonCheckbox color="primary" disabled={true} checked={guitar.available}/>
+                            <IonCheckbox class={'square-a'} color="primary" disabled={true} checked={guitar.available}/>
                         </IonCol>
                     </IonRow>
                     <IonRow>
@@ -193,8 +267,12 @@ export const GuitarItem: React.FC<{ guitar: Guitar, onEdit: (id?: string) => voi
                     {guitar.longitude && guitar.latitude &&
                     <IonRow>
                         <IonCol>
-                            <a href={`https://www.google.ro/maps/@${guitar.latitude},${guitar.longitude},8z`}
-                               target={'_blank'}>Guitar location</a>
+                            <div className={'maps-link'}>
+                                <IonIcon className={'icon'}
+                                         src={'https://www.flaticon.com/svg/static/icons/svg/57/57116.svg'}/>
+                                <a href={`https://www.google.ro/maps/@${guitar.latitude},${guitar.longitude},8z`}
+                                   target={'_blank'}>Guitar location</a>
+                            </div>
                         </IonCol>
                     </IonRow>
                     }
